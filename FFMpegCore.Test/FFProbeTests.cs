@@ -95,6 +95,9 @@ namespace FFMpegCore.Test
             Assert.AreEqual(16, info.PrimaryVideoStream.DisplayAspectRatio.Width);
             Assert.AreEqual(9, info.PrimaryVideoStream.DisplayAspectRatio.Height);
             Assert.AreEqual("yuv420p", info.PrimaryVideoStream.PixelFormat);
+            Assert.IsNull(info.PrimaryVideoStream.ColorSpace);
+            Assert.IsNull(info.PrimaryVideoStream.ColorPrimaries);
+            Assert.IsNull(info.PrimaryVideoStream.ColorTransfer);
             Assert.AreEqual(1280, info.PrimaryVideoStream.Width);
             Assert.AreEqual(720, info.PrimaryVideoStream.Height);
             Assert.AreEqual(25, info.PrimaryVideoStream.AvgFrameRate);
