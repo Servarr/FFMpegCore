@@ -1,0 +1,29 @@
+variables:
+  majorVersion: '4.8.0'
+  minorVersion: $[counter('minorVersion', 1)]
+
+stages:
+  - stage: Build
+    jobs:
+    - job: Build
+      pool:
+        vmImage: ubuntu-18.04
+      steps:
+        - bash: |
+            sed -i'' -e "s/<PackageVersion>[0-9.*]\+<\/PackageVersion>/<PackageVersion>${MAJORVERSION}.${MINORVERSION}<\/PackageVersion>/g" FFMpegCore/FFMpegCore.csproj
+          displayName: Update Version
+        - task: DotNetCoreCLI@2
+          displayName: Build
+          inputs:
+            command: 'build'
+            projects: 'FFMpegCore.sln'
+            arguments: '/p:Configuration=Release'
+
+        - publish: FFMpegCore/bin/Release
+          artifact: 'nupkg'
+        - task: DotNetCoreCLI@2
+          inputs:
+            command: 'push'
+            packagesToPush: 'FFMpegCore/bin/Release/*.nupkg'
+            nuGetFeedType: 'internal'
+            publishVstsFeed: '7ab38f4e-5a57-4d70-84f4-94dd9bc5d6df/783c2dce-dbc3-4218-8816-4a5e12af4d84'
