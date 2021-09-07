@@ -51,7 +51,7 @@ namespace FFMpegCore
             return new VideoStream
             {
                 Index = stream.Index,
-                AvgFrameRate = MediaAnalysisUtils.DivideRatio(MediaAnalysisUtils.ParseRatioDouble(stream.AvgFrameRate, '/')),
+                AvgFrameRate = MediaAnalysisUtils.DivideRatio(MediaAnalysisUtils.ParseRatioInt(stream.AvgFrameRate, '/')),
                 BitRate = !string.IsNullOrEmpty(stream.BitRate) ? MediaAnalysisUtils.ParseIntInvariant(stream.BitRate) : default,
                 BitsPerRawSample = !string.IsNullOrEmpty(stream.BitsPerRawSample) ? MediaAnalysisUtils.ParseIntInvariant(stream.BitsPerRawSample) : default,
                 CodecName = stream.CodecName,
@@ -60,7 +60,7 @@ namespace FFMpegCore
                 CodecTagString = stream.CodecTagString,
                 DisplayAspectRatio = MediaAnalysisUtils.ParseRatioInt(stream.DisplayAspectRatio, ':'),
                 Duration = MediaAnalysisUtils.ParseDuration(stream),
-                FrameRate = MediaAnalysisUtils.DivideRatio(MediaAnalysisUtils.ParseRatioDouble(stream.FrameRate, '/')),
+                FrameRate = MediaAnalysisUtils.DivideRatio(MediaAnalysisUtils.ParseRatioInt(stream.FrameRate, '/')),
                 Height = stream.Height ?? 0,
                 Width = stream.Width ?? 0,
                 Profile = stream.Profile,
@@ -116,20 +116,13 @@ namespace FFMpegCore
     {
         private static readonly Regex DurationRegex = new Regex(@"^(\d+):(\d{1,2}):(\d{1,2})\.(\d{1,3})", RegexOptions.Compiled);
 
-        public static double DivideRatio((double, double) ratio) => ratio.Item1 / ratio.Item2;
+        public static decimal DivideRatio((int, int) ratio) => ratio.Item1 == 0 ? 0 : (decimal)ratio.Item1 / (decimal)ratio.Item2;
 
         public static (int, int) ParseRatioInt(string input, char separator)
         {
             if (string.IsNullOrEmpty(input)) return (0, 0);
             var ratio = input.Split(separator);
             return (ParseIntInvariant(ratio[0]), ParseIntInvariant(ratio[1]));
-        }
-
-        public static (double, double) ParseRatioDouble(string input, char separator)
-        {
-            if (string.IsNullOrEmpty(input)) return (0, 0);
-            var ratio = input.Split(separator);
-            return (ratio.Length > 0 ? ParseDoubleInvariant(ratio[0]) : 0, ratio.Length > 1 ? ParseDoubleInvariant(ratio[1]) : 0);
         }
 
         public static double ParseDoubleInvariant(string line) =>
