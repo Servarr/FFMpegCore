@@ -130,6 +130,8 @@ namespace FFMpegCore.Test
             Assert.AreEqual("0x6134706d", info.PrimaryAudioStream.CodecTag);
             
             Assert.AreEqual(1471810, info.PrimaryVideoStream!.BitRate);
+            Assert.AreEqual(25m, info.PrimaryVideoStream.FrameRate);
+            Assert.AreEqual(25m, info.PrimaryVideoStream.AvgFrameRate);
             Assert.AreEqual(16, info.PrimaryVideoStream.DisplayAspectRatio.Width);
             Assert.AreEqual(9, info.PrimaryVideoStream.DisplayAspectRatio.Height);
             Assert.AreEqual("yuv420p", info.PrimaryVideoStream.PixelFormat);
