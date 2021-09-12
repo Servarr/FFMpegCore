@@ -12,6 +12,9 @@
 
   <ItemGroup>
     <None Remove="ffmpeg.config.json" />
+    <None Update="Resources\dovi.mp4">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="Resources\input.webm">
       <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
     </None>
