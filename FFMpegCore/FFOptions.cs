@@ -38,5 +38,7 @@ namespace FFMpegCore
         /// Whether to cache calls to get ffmpeg codec, pixel- and container-formats
         /// </summary>
         public bool UseCache { get; set; } = true;
+
+        public string ExtraArguments { get; set; }
     }
 }
