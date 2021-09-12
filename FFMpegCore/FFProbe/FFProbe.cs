@@ -13,6 +13,31 @@ namespace FFMpegCore
 {
     public static class FFProbe
     {
+        public static string GetJson(string filePath, int outputCapacity = int.MaxValue,
+            FFOptions? ffOptions = null)
+        {
+            if (!File.Exists(filePath))
+                throw new FFMpegException(FFMpegExceptionType.File, $"No file found at '{filePath}'");
+
+            using var instance = PrepareStreamAnalysisInstance(filePath, outputCapacity, ffOptions ?? GlobalFFOptions.Current);
+            var exitCode = instance.BlockUntilFinished();
+            if (exitCode != 0)
+                throw new FFMpegException(FFMpegExceptionType.Process, $"ffprobe exited with non-zero exit-code ({exitCode} - {string.Join("\n", instance.ErrorData)})", null, string.Join("\n", instance.ErrorData));
+
+            return string.Join(string.Empty, instance.OutputData);
+        }
+        public static IMediaAnalysis AnalyseJson(string json)
+        {
+            var ffprobeAnalysis = JsonSerializer.Deserialize<FFProbeAnalysis>(json, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
+
+            if (ffprobeAnalysis?.Format == null)
+                throw new FormatNullException();
+
+            return new MediaAnalysis(ffprobeAnalysis);
+        }
         public static IMediaAnalysis Analyse(string filePath, int outputCapacity = int.MaxValue, FFOptions? ffOptions = null)
         {
             if (!File.Exists(filePath)) 
@@ -129,16 +154,7 @@ namespace FFMpegCore
 
         private static IMediaAnalysis ParseOutput(Instance instance)
         {
-            var json = string.Join(string.Empty, instance.OutputData);
-            var ffprobeAnalysis = JsonSerializer.Deserialize<FFProbeAnalysis>(json, new JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true
-            });
-            
-            if (ffprobeAnalysis?.Format == null)
-                throw new FormatNullException();
-            
-            return new MediaAnalysis(ffprobeAnalysis);
+            return AnalyseJson(string.Join(string.Empty, instance.OutputData));
         }
         private static FFProbeFrames ParseFramesOutput(Instance instance)
         {
@@ -154,14 +170,15 @@ namespace FFMpegCore
 
 
         private static Instance PrepareStreamAnalysisInstance(string filePath, int outputCapacity, FFOptions ffOptions)
-            => PrepareInstance($"-loglevel error -print_format json -show_format -sexagesimal -show_streams \"{filePath}\"", outputCapacity, ffOptions);
+            => PrepareInstance($"-loglevel error -print_format json -show_format -sexagesimal -show_streams {ffOptions.ExtraArguments} \"{filePath}\"", outputCapacity, ffOptions);
         private static Instance PrepareFrameAnalysisInstance(string filePath, int outputCapacity, FFOptions ffOptions)
-            => PrepareInstance($"-loglevel error -print_format json -show_frames -v quiet -sexagesimal \"{filePath}\"", outputCapacity, ffOptions);
+            => PrepareInstance($"-loglevel error -print_format json -show_frames -v quiet -sexagesimal {ffOptions.ExtraArguments} \"{filePath}\"", outputCapacity, ffOptions);
         
         private static Instance PrepareInstance(string arguments, int outputCapacity, FFOptions ffOptions)
         {
             FFProbeHelper.RootExceptionCheck();
             FFProbeHelper.VerifyFFProbeExists(ffOptions);
+
             var startInfo = new ProcessStartInfo(GlobalFFOptions.GetFFProbeBinaryPath(), arguments)
             {
                 StandardOutputEncoding = ffOptions.Encoding,
