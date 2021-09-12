@@ -17,7 +17,8 @@ namespace FFMpegCore
         public string? Language { get; set; }
         public Dictionary<string, bool>? Disposition { get; set; }
         public Dictionary<string, string>? Tags { get; set; }
-        
+        public List<SideData> SideDataList { get; set; } = null!;
+
         public Codec GetCodecInfo() => FFMpeg.GetCodec(CodecName);
     }
 }

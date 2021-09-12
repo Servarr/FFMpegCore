@@ -1,4 +1,6 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
+using System.Text.Json;
 using System.Text.Json.Serialization;
 
 namespace FFMpegCore
@@ -86,8 +88,45 @@ namespace FFMpegCore
         [JsonPropertyName("disposition")]
         public Dictionary<string, int> Disposition { get; set; } = null!;
 
+        [JsonPropertyName("side_data_list")]
+        public List<SideData> SideDataList { get; set; } = null!;
+
         [JsonPropertyName("tags")]
         public Dictionary<string, string> Tags { get; set; } = null!;
+    }
+
+    [JsonConverter(typeof(SideDataConverter))]
+    public class SideData
+    {
+        [JsonPropertyName("side_data_type")]
+        public string SideDataType { get; set; } = null!;
+    }
+
+    public class DoviConfigurationRecordSideData : SideData
+    {
+        [JsonPropertyName("dv_version_major")]
+        public int DvVersionMajor { get; set; }
+
+        [JsonPropertyName("dv_version_minor")]
+        public int DvVersionMinor { get; set; }
+
+        [JsonPropertyName("dv_profile")]
+        public int DvProfile { get; set; }
+
+        [JsonPropertyName("dv_level")]
+        public int DvLevel { get; set; }
+
+        [JsonPropertyName("rpu_present_flag")]
+        public int RpuPresentFlag { get; set; }
+
+        [JsonPropertyName("el_present_flag")]
+        public int ElPresentFlag { get; set; }
+
+        [JsonPropertyName("bl_present_flag")]
+        public int BlPresentFlag { get; set; }
+
+        [JsonPropertyName("dv_bl_signal_compatibility_id")]
+        public int DvBlSignalCompatibilityId { get; set; }
     }
 
     public class Format : ITagsContainer
@@ -162,5 +201,53 @@ namespace FFMpegCore
 
         public static int? GetDefault(this IDispositionContainer tagsContainer) => TryGetDispositionValue(tagsContainer, "default");
         public static int? GetForced(this IDispositionContainer tagsContainer) => TryGetDispositionValue(tagsContainer, "forced");
+    }
+
+    public class SideDataConverter : JsonConverter<SideData>
+    {
+        public override bool CanConvert(Type type)
+        {
+            return type.IsAssignableFrom(typeof(SideData));
+        }
+
+        public override SideData Read(ref Utf8JsonReader reader, Type typeToConvert, JsonSerializerOptions options)
+        {
+            if (JsonDocument.TryParseValue(ref reader, out var doc))
+            {
+                if (doc.RootElement.TryGetProperty("side_data_type", out var type))
+                {
+                    var sideDataType = type.GetString();
+
+                    if (string.IsNullOrWhiteSpace(sideDataType))
+                    {
+                        throw new JsonException("\"side_data_type\" cannot be null or empty");
+                    }
+
+                    var rootElement = doc.RootElement.GetRawText();
+
+                    var result = sideDataType switch
+                    {
+                        "DOVI configuration record" => JsonSerializer.Deserialize<DoviConfigurationRecordSideData>(rootElement, options),
+                        _ => new SideData { SideDataType = sideDataType }
+                    };
+
+                    if (result == null)
+                    {
+                        throw new JsonException("Could not deserialize FFProbeSideData");
+                    }
+
+                    return result;
+                }
+
+                throw new JsonException("Missing \"side_data_type\" property in side data entry");
+            }
+
+            throw new JsonException("Failed to parse side_data_list entry");
+        }
+
+        public override void Write(Utf8JsonWriter writer, SideData value, JsonSerializerOptions options)
+        {
+            throw new NotImplementedException();
+        }
     }
 }
