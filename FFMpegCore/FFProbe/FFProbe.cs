@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Text.Json;
@@ -151,6 +152,27 @@ namespace FFMpegCore
             
             pipeArgument.Post();
             return ParseOutput(instance);
+        }
+
+        public static List<FFProbePixelFormat> GetPixelFormats(FFOptions? ffOptions = null)
+        {
+            FFProbeHelper.RootExceptionCheck();
+
+            var options = ffOptions ?? GlobalFFOptions.Current;
+            FFProbeHelper.VerifyFFProbeExists(options);
+
+            using var instance = new Instances.Instance(GlobalFFOptions.GetFFProbeBinaryPath(), "-loglevel error -print_format json -show_pixel_formats")
+            {
+                DataBufferCapacity = int.MaxValue
+            };
+
+            var exitCode = instance.BlockUntilFinished();
+            if (exitCode != 0)
+                throw new FFProbeProcessException($"ffprobe exited with non-zero exit-code ({exitCode} - {string.Join("\n", instance.ErrorData)})", instance.ErrorData);
+
+            var output = string.Join(string.Empty, instance.OutputData);
+
+            return JsonSerializer.Deserialize<FFProbePixelFormats>(output, SerializerOptions)?.PixelFormats ?? new List<FFProbePixelFormat>();
         }
 
         private static IMediaAnalysis ParseOutput(Instance instance)
