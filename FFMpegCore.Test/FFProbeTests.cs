@@ -154,5 +154,12 @@ namespace FFMpegCore.Test
             Assert.AreEqual(true, info.PrimaryAudioStream.Disposition["default"]);
             Assert.AreEqual(false, info.PrimaryAudioStream.Disposition["forced"]);
         }
+
+        [TestMethod]
+        public void Get_Probe_Pixel_Formats()
+        {
+            var formats = FFProbe.GetPixelFormats();
+            Assert.IsTrue(formats.Count > 0);
+        }
     }
 }

@@ -39,6 +39,6 @@ namespace FFMpegCore
         /// </summary>
         public bool UseCache { get; set; } = true;
 
-        public string ExtraArguments { get; set; }
+        public string ExtraArguments { get; set; } = string.Empty;
     }
 }
