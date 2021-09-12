@@ -47,5 +47,7 @@ namespace FFMpegCore
         /// Creates a new object that is a copy of the current instance.
         /// </summary>
         public FFOptions Clone() => (FFOptions)MemberwiseClone();
+        
+        public string ExtraArguments { get; set; } = string.Empty;
     }
 }

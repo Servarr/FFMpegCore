@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Text.Json;
@@ -14,6 +15,32 @@ namespace FFMpegCore
 {
     public static class FFProbe
     {
+        private static readonly JsonSerializerOptions SerializerOptions = new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true
+        };
+
+        public static string GetJson(string filePath, FFOptions? ffOptions = null)
+        {
+            if (!File.Exists(filePath))
+                throw new FFMpegException(FFMpegExceptionType.File, $"No file found at '{filePath}'");
+
+            var instance = PrepareStreamAnalysisInstance(filePath, ffOptions ?? GlobalFFOptions.Current);
+            var result = instance.StartAndWaitForExit();
+            ThrowIfExitCodeNotZero(result);
+
+            return string.Join(string.Empty, result.OutputData);
+        }
+
+        public static IMediaAnalysis AnalyseJson(string json)
+        {
+            var ffprobeAnalysis = JsonSerializer.Deserialize<FFProbeAnalysis>(json, SerializerOptions);
+            if (ffprobeAnalysis?.Format == null)
+                throw new FormatNullException();
+
+            return new MediaAnalysis(ffprobeAnalysis);
+        }
+
         public static IMediaAnalysis Analyse(string filePath, FFOptions? ffOptions = null)
         {
             ThrowIfInputFileDoesNotExist(filePath);
@@ -141,20 +168,31 @@ namespace FFMpegCore
             return ParseOutput(result);
         }
 
+        public static List<FFProbePixelFormat> GetPixelFormats(FFOptions? ffOptions = null)
+        {
+            FFProbeHelper.RootExceptionCheck();
+
+            var options = ffOptions ?? GlobalFFOptions.Current;
+            FFProbeHelper.VerifyFFProbeExists(options);
+
+            var instance = new ProcessArguments(GlobalFFOptions.GetFFProbeBinaryPath(), "-loglevel error -print_format json -show_pixel_formats")
+            {
+                DataBufferCapacity = int.MaxValue
+            };
+
+            var result = instance.StartAndWaitForExit();
+            ThrowIfExitCodeNotZero(result);
+
+            var output = string.Join(string.Empty, result.OutputData);
+
+            return JsonSerializer.Deserialize<FFProbePixelFormats>(output, SerializerOptions)?.PixelFormats ?? new List<FFProbePixelFormat>();
+        }
+
         private static IMediaAnalysis ParseOutput(IProcessResult instance)
         {
-            var json = string.Join(string.Empty, instance.OutputData);
-            var ffprobeAnalysis = JsonSerializer.Deserialize<FFProbeAnalysis>(json, new JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true
-            });
-            
-            if (ffprobeAnalysis?.Format == null)
-                throw new FormatNullException();
-            
-            ffprobeAnalysis.ErrorData = instance.ErrorData;
-            return new MediaAnalysis(ffprobeAnalysis);
+            return AnalyseJson(string.Join(string.Empty, instance.OutputData));
         }
+
         private static FFProbeFrames ParseFramesOutput(IProcessResult instance)
         {
             var json = string.Join(string.Empty, instance.OutputData);
@@ -197,9 +235,9 @@ namespace FFMpegCore
         }
 
         private static ProcessArguments PrepareStreamAnalysisInstance(string filePath, FFOptions ffOptions)
-            => PrepareInstance($"-loglevel error -print_format json -show_format -sexagesimal -show_streams \"{filePath}\"", ffOptions);
+            => PrepareInstance($"-loglevel error -print_format json -show_format -sexagesimal -show_streams {ffOptions.ExtraArguments} \"{filePath}\"", ffOptions);
         private static ProcessArguments PrepareFrameAnalysisInstance(string filePath, FFOptions ffOptions)
-            => PrepareInstance($"-loglevel error -print_format json -show_frames -v quiet -sexagesimal \"{filePath}\"", ffOptions);
+            => PrepareInstance($"-loglevel error -print_format json -show_frames -v quiet -sexagesimal {ffOptions.ExtraArguments} \"{filePath}\"", ffOptions);
         private static ProcessArguments PreparePacketAnalysisInstance(string filePath, FFOptions ffOptions)
             => PrepareInstance($"-loglevel error -print_format json -show_packets -v quiet -sexagesimal \"{filePath}\"", ffOptions);
         
