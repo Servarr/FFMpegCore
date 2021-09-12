@@ -13,6 +13,11 @@ namespace FFMpegCore
 {
     public static class FFProbe
     {
+        private static readonly JsonSerializerOptions SerializerOptions = new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true
+        };
+
         public static string GetJson(string filePath, int outputCapacity = int.MaxValue,
             FFOptions? ffOptions = null)
         {
@@ -28,11 +33,7 @@ namespace FFMpegCore
         }
         public static IMediaAnalysis AnalyseJson(string json)
         {
-            var ffprobeAnalysis = JsonSerializer.Deserialize<FFProbeAnalysis>(json, new JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true
-            });
-
+            var ffprobeAnalysis = JsonSerializer.Deserialize<FFProbeAnalysis>(json, SerializerOptions);
             if (ffprobeAnalysis?.Format == null)
                 throw new FormatNullException();
 
