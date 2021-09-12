@@ -48,6 +48,6 @@ namespace FFMpegCore
         /// </summary>
         public FFOptions Clone() => (FFOptions)MemberwiseClone();
         
-        public string ExtraArguments { get; set; }
+        public string ExtraArguments { get; set; } = string.Empty;
     }
 }
