@@ -149,6 +149,17 @@ namespace FFMpegCore.Test
             Assert.AreEqual("avc1", info.PrimaryVideoStream.CodecTagString);
             Assert.AreEqual("0x31637661", info.PrimaryVideoStream.CodecTag);
         }
+
+        [TestMethod]
+        public void Probe_Dolby_Vision()
+        {
+            var info = FFProbe.Analyse(TestResources.Dovi, int.MaxValue);
+            Assert.AreEqual(1, info.PrimaryVideoStream.SideDataList.Count);
+            Assert.AreEqual(nameof(DoviConfigurationRecordSideData), info.PrimaryVideoStream.SideDataList.First().GetType().Name);
+
+            var dvrecord = info.PrimaryVideoStream.SideDataList.First() as DoviConfigurationRecordSideData;
+            Assert.AreEqual(5, dvrecord.DvProfile);
+        }
         
         [TestMethod, Timeout(10000)]
         public async Task Probe_Async_Success()
