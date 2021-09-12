@@ -72,6 +72,7 @@ namespace FFMpegCore
                 Language = stream.GetLanguage(),
                 Disposition = MediaAnalysisUtils.FormatDisposition(stream.Disposition),
                 Tags = stream.Tags,
+                SideDataList = stream.SideDataList,
             };
         }
 
@@ -93,6 +94,7 @@ namespace FFMpegCore
                 Language = stream.GetLanguage(),
                 Disposition = MediaAnalysisUtils.FormatDisposition(stream.Disposition),
                 Tags = stream.Tags,
+                SideDataList = stream.SideDataList,
             };
         }
 
@@ -108,6 +110,7 @@ namespace FFMpegCore
                 Language = stream.GetLanguage(),
                 Disposition = MediaAnalysisUtils.FormatDisposition(stream.Disposition),
                 Tags = stream.Tags,
+                SideDataList = stream.SideDataList,
             };
         }
     }
