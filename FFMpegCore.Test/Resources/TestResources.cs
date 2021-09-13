@@ -22,5 +22,6 @@
         public static readonly string ImageCollection = "./Resources/images";
         public static readonly string SrtSubtitle = "./Resources/sample.srt";
         public static readonly string Dovi = "./Resources/dovi.mp4";
+        public static readonly string Interlaced = "./Resources/interlaced.mkv";
     }
 }

@@ -83,6 +83,9 @@
     <None Update="Resources\input.mp4">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>
+    <None Update="Resources\interlaced.mkv">
+      <CopyToOutputDirectory>PreserveNewest</CopyToOutputDirectory>
+    </None>
     <None Update="Resources\mute.mp4">
       <CopyToOutputDirectory>Always</CopyToOutputDirectory>
     </None>

@@ -16,6 +16,7 @@ namespace FFMpegCore
         public string ColorSpace { get; internal set; } = null!;
         public string ColorPrimaries { get; internal set; } = null!;
         public string ColorTransfer { get; internal set; } = null!;
+        public string FieldOrder { get; internal set; } = null!;
 
         public PixelFormat GetPixelFormatInfo() => FFMpeg.GetPixelFormat(PixelFormat);
     }
