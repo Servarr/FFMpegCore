@@ -70,6 +70,7 @@ namespace FFMpegCore
                 ColorSpace = stream.ColorSpace,
                 ColorPrimaries = stream.ColorPrimaries,
                 ColorTransfer = stream.ColorTransfer,
+                FieldOrder = stream.FieldOrder,
                 Rotation = (int)float.Parse(stream.GetRotate() ?? "0"),
                 Language = stream.GetLanguage(),
                 Disposition = MediaAnalysisUtils.FormatDisposition(stream.Disposition),

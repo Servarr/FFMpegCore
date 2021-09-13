@@ -82,6 +82,9 @@ namespace FFMpegCore
         [JsonPropertyName("color_transfer")]
         public string ColorTransfer { get; set; } = null!;
 
+        [JsonPropertyName("field_order")]
+        public string FieldOrder { get; set; } = null!;
+
         [JsonPropertyName("sample_rate")]
         public string SampleRate { get; set; } = null!;
 
