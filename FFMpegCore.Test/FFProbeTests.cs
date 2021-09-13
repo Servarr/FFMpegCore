@@ -160,7 +160,14 @@ namespace FFMpegCore.Test
             var dvrecord = info.PrimaryVideoStream.SideDataList.First() as DoviConfigurationRecordSideData;
             Assert.AreEqual(5, dvrecord.DvProfile);
         }
-        
+
+        [TestMethod]
+        public void Probe_Interlaced()
+        {
+            var info = FFProbe.Analyse(TestResources.Interlaced);
+            Assert.AreEqual("tt", info.PrimaryVideoStream.FieldOrder);
+        }
+
         [TestMethod, Timeout(10000)]
         public async Task Probe_Async_Success()
         {
