@@ -73,11 +73,98 @@ namespace FFMpegCore
         
         [JsonPropertyName("chroma_location")]
         public string ChromaLocation { get; set; }
+
+        [JsonPropertyName("side_data_list")]
+        public List<SideData> SideDataList { get; set; } = null!;
     }
 
     public class FFProbeFrames
     {
         [JsonPropertyName("frames")]
         public List<FFProbeFrameAnalysis> Frames { get; set; }
+    }
+
+    public class MasteringDisplayMetadata : SideData
+    {
+        [JsonPropertyName("red_x")]
+        public string RedX { get; set; }
+
+        [JsonPropertyName("red_y")]
+        public string RedY { get; set; }
+
+        [JsonPropertyName("green_x")]
+        public string GreenX { get; set; }
+
+        [JsonPropertyName("green_y")]
+        public string GreenY { get; set; }
+
+        [JsonPropertyName("blue_x")]
+        public string BlueX { get; set; }
+
+        [JsonPropertyName("blue_y")]
+        public string BlueY { get; set; }
+
+        [JsonPropertyName("white_point_x")]
+        public string WhitePointX { get; set; }
+
+        [JsonPropertyName("white_point_y")]
+        public string WhitePointY { get; set; }
+
+        [JsonPropertyName("min_luminance")]
+        public string MinLuminance { get; set; }
+
+        [JsonPropertyName("max_luminance")]
+        public string MaxLuminance { get; set; }
+    }
+
+    public class ContentLightLevelMetadata : SideData
+    {
+        [JsonPropertyName("max_content")]
+        public int MaxContent { get; set; }
+
+        [JsonPropertyName("max_average")]
+        public string MaxAverage { get; set; }
+    }
+
+    public class HdrDynamicMetadataSpmte2094 : SideData
+    {
+        [JsonPropertyName("application version")]
+        public int ApplicationVersion { get; set; }
+
+        [JsonPropertyName("num_windows")]
+        public int NumWindows { get; set; }
+
+        [JsonPropertyName("targeted_system_display_maximum_luminance")]
+        public string TargetedSystemDisplayMaximumLuminance { get; set; }
+
+        [JsonPropertyName("maxscl")]
+        public string Maxscl { get; set; }
+
+        [JsonPropertyName("average_maxrgb")]
+        public string AverageMaxrgb { get; set; }
+
+        [JsonPropertyName("num_distribution_maxrgb_percentiles")]
+        public int NumDistributionMaxrgbPercentiles { get; set; }
+
+        [JsonPropertyName("distribution_maxrgb_percentage")]
+        public int DistributionMaxrgbPercentage { get; set; }
+
+        [JsonPropertyName("distribution_maxrgb_percentile")]
+        public string DistributionMaxrgbPercentile { get; set; }
+
+        [JsonPropertyName("fraction_bright_pixels")]
+        public string FractionBrightPixels { get; set; }
+
+        [JsonPropertyName("knee_point_x")]
+        public string KneePointX { get; set; }
+
+        [JsonPropertyName("knee_point_y")]
+        public string KneePointY { get; set; }
+
+        [JsonPropertyName("num_bezier_curve_anchors")]
+        public int NumBezierCurveAnchors { get; set; }
+
+        [JsonPropertyName("bezier_curve_anchors")]
+        public string BezierCurveAnchors { get; set; }
     }
 }
