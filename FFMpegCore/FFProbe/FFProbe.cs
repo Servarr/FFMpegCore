@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using System.Diagnostics;
 using System.IO;
 using System.Text.Json;
+using System.Text.Json.Serialization;
 using System.Threading.Tasks;
 using FFMpegCore.Arguments;
 using FFMpegCore.Exceptions;
@@ -14,12 +15,18 @@ namespace FFMpegCore
 {
     public static class FFProbe
     {
-        private static readonly JsonSerializerOptions SerializerOptions = new JsonSerializerOptions
+        private static readonly JsonSerializerOptions StreamSerializerOptions = new JsonSerializerOptions
         {
             PropertyNameCaseInsensitive = true
         };
 
-        public static string GetJson(string filePath, int outputCapacity = int.MaxValue,
+        private static readonly JsonSerializerOptions FramesSerializerOptions = new JsonSerializerOptions
+        {
+            PropertyNameCaseInsensitive = true,
+            NumberHandling = JsonNumberHandling.AllowReadingFromString
+        };
+
+        public static string GetStreamJson(string filePath, int outputCapacity = int.MaxValue,
             FFOptions? ffOptions = null)
         {
             if (!File.Exists(filePath))
@@ -32,9 +39,9 @@ namespace FFMpegCore
 
             return string.Join(string.Empty, instance.OutputData);
         }
-        public static IMediaAnalysis AnalyseJson(string json)
+        public static IMediaAnalysis AnalyseStreamJson(string json)
         {
-            var ffprobeAnalysis = JsonSerializer.Deserialize<FFProbeAnalysis>(json, SerializerOptions);
+            var ffprobeAnalysis = JsonSerializer.Deserialize<FFProbeAnalysis>(json, StreamSerializerOptions);
             if (ffprobeAnalysis?.Format == null)
                 throw new FormatNullException();
 
@@ -51,6 +58,23 @@ namespace FFMpegCore
                 throw new FFMpegException(FFMpegExceptionType.Process, $"ffprobe exited with non-zero exit-code ({exitCode} - {string.Join("\n", instance.ErrorData)})", null, string.Join("\n", instance.ErrorData));
             
             return ParseOutput(instance);
+        }
+        public static string GetFrameJson(string filePath, int outputCapacity = int.MaxValue,
+            FFOptions? ffOptions = null)
+        {
+            if (!File.Exists(filePath))
+                throw new FFMpegException(FFMpegExceptionType.File, $"No file found at '{filePath}'");
+
+            using var instance = PrepareFrameAnalysisInstance(filePath, outputCapacity, ffOptions ?? GlobalFFOptions.Current);
+            var exitCode = instance.BlockUntilFinished();
+            if (exitCode != 0)
+                throw new FFMpegException(FFMpegExceptionType.Process, $"ffprobe exited with non-zero exit-code ({exitCode} - {string.Join("\n", instance.ErrorData)})", null, string.Join("\n", instance.ErrorData));
+
+            return string.Join(string.Empty, instance.OutputData);
+        }
+        public static FFProbeFrames AnalyseFrameJson(string json)
+        {
+            return JsonSerializer.Deserialize<FFProbeFrames>(json, FramesSerializerOptions);
         }
         public static FFProbeFrames GetFrames(string filePath, int outputCapacity = int.MaxValue, FFOptions? ffOptions = null)
         {
@@ -197,23 +221,16 @@ namespace FFMpegCore
 
             var output = string.Join(string.Empty, instance.OutputData);
 
-            return JsonSerializer.Deserialize<FFProbePixelFormats>(output, SerializerOptions)?.PixelFormats ?? new List<FFProbePixelFormat>();
+            return JsonSerializer.Deserialize<FFProbePixelFormats>(output, StreamSerializerOptions)?.PixelFormats ?? new List<FFProbePixelFormat>();
         }
 
         private static IMediaAnalysis ParseOutput(Instance instance)
         {
-            return AnalyseJson(string.Join(string.Empty, instance.OutputData));
+            return AnalyseStreamJson(string.Join(string.Empty, instance.OutputData));
         }
         private static FFProbeFrames ParseFramesOutput(Instance instance)
         {
-            var json = string.Join(string.Empty, instance.OutputData);
-            var ffprobeAnalysis = JsonSerializer.Deserialize<FFProbeFrames>(json, new JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true,
-                NumberHandling = System.Text.Json.Serialization.JsonNumberHandling.AllowReadingFromString | System.Text.Json.Serialization.JsonNumberHandling.WriteAsString
-            }) ;
-
-            return ffprobeAnalysis;
+            return AnalyseFrameJson(string.Join(string.Empty, instance.OutputData));
         }
 
         private static FFProbePackets ParsePacketsOutput(Instance instance)
