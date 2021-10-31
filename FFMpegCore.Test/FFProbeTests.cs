@@ -1,6 +1,7 @@
 ﻿using System;
 using System.IO;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using FFMpegCore.Test.Resources;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -37,6 +38,19 @@ namespace FFMpegCore.Test
             Assert.IsTrue(frameAnalysis.Frames.All(f => f.Width == 640));
             Assert.IsTrue(frameAnalysis.Frames.All(f => f.MediaType == "video"));
         }
+
+        [TestMethod]
+        public void FrameAnalysis_Json_Sync()
+        {
+            var json = FFProbe.GetFrameJson(TestResources.WebmVideo);
+
+            var analysis = FFProbe.AnalyseFrameJson(json);
+
+            var json2 = JsonSerializer.Serialize(analysis);
+
+            Assert.IsTrue(json2.Length > 0);
+        }
+
 
         [TestMethod]
         public async Task FrameAnalysis_Async()
