@@ -228,6 +228,9 @@ namespace FFMpegCore
                     var result = sideDataType switch
                     {
                         "DOVI configuration record" => JsonSerializer.Deserialize<DoviConfigurationRecordSideData>(rootElement, options),
+                        "Mastering display metadata" => JsonSerializer.Deserialize<MasteringDisplayMetadata>(rootElement, options),
+                        "Content light level metadata" => JsonSerializer.Deserialize<ContentLightLevelMetadata>(rootElement, options),
+                        "HDR Dynamic Metadata SMPTE2094-40 (HDR10+)" => JsonSerializer.Deserialize<HdrDynamicMetadataSpmte2094>(rootElement, options),
                         _ => new SideData { SideDataType = sideDataType }
                     };
 
@@ -247,7 +250,7 @@ namespace FFMpegCore
 
         public override void Write(Utf8JsonWriter writer, SideData value, JsonSerializerOptions options)
         {
-            throw new NotImplementedException();
+            JsonSerializer.Serialize(writer, (object)value, options);
         }
     }
 }
