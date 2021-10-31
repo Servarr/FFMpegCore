@@ -123,7 +123,7 @@ namespace FFMpegCore
         public int MaxContent { get; set; }
 
         [JsonPropertyName("max_average")]
-        public string MaxAverage { get; set; }
+        public int MaxAverage { get; set; }
     }
 
     public class HdrDynamicMetadataSpmte2094 : SideData
