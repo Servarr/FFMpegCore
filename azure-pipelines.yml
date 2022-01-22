@@ -1,8 +1,21 @@
 variables:
-  majorVersion: '4.6'
+  majorVersion: '4.5.0'
   minorVersion: $[counter('minorVersion', 1)]
 
 stages:
+  - stage: Setup
+    displayName: Setup
+    jobs:
+    - job:
+      displayName: Build Variables
+      pool:
+        vmImage: 'ubuntu-20.04'
+      steps:
+        # Set the build name properly.  The 'name' property won't recursively expand so hack here:
+        - bash: |
+            NUGETVERSION="${MAJORVERSION}-${MINORVERSION}"
+            echo "##vso[build.updatebuildnumber]$NUGETVERSION"
+          displayName: Set Build Name
   - stage: Build
     jobs:
     - job: Build
@@ -10,7 +23,9 @@ stages:
         vmImage: ubuntu-18.04
       steps:
         - bash: |
-            sed -i'' -e "s/<PackageVersion>[0-9.*]\+<\/PackageVersion>/<PackageVersion>${MAJORVERSION}.${MINORVERSION}<\/PackageVersion>/g" FFMpegCore/FFMpegCore.csproj
+            NUGETVERSION="${MAJORVERSION}-${MINORVERSION}"
+            echo $NUGETVERSION
+            sed -i'' -e "s/<PackageVersion>[0-9.*]\+<\/PackageVersion>/<PackageVersion>${NUGETVERSION}<\/PackageVersion>/g" FFMpegCore/FFMpegCore.csproj
           displayName: Update Version
         - task: DotNetCoreCLI@2
           displayName: Build

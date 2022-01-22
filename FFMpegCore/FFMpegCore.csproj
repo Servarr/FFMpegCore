@@ -4,6 +4,7 @@
     <NeutralLanguage>en</NeutralLanguage>
     <RepositoryUrl>https://github.com/rosenbjerg/FFMpegCore</RepositoryUrl>
     <PackageProjectUrl>https://github.com/rosenbjerg/FFMpegCore</PackageProjectUrl>
+    <PackageId>Servarr.FFMpegCore</PackageId>
     <Copyright></Copyright>
     <Description>A .NET Standard FFMpeg/FFProbe wrapper for easily integrating media analysis and conversion into your .NET applications</Description>
     <AssemblyVersion>4.0.0.0</AssemblyVersion>
