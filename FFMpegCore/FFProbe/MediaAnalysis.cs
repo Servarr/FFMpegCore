@@ -120,7 +120,7 @@ namespace FFMpegCore
     {
         private static readonly Regex DurationRegex = new Regex(@"^(\d+):(\d{1,2}):(\d{1,2})\.(\d{1,3})", RegexOptions.Compiled);
 
-        public static decimal DivideRatio((int, int) ratio) => ratio.Item1 == 0 ? 0 : (decimal)ratio.Item1 / (decimal)ratio.Item2;
+        public static decimal DivideRatio((int, int) ratio) => ratio.Item2 == 0 ? 0 : (decimal)ratio.Item1 / (decimal)ratio.Item2;
 
         public static (int, int) ParseRatioInt(string input, char separator)
         {
