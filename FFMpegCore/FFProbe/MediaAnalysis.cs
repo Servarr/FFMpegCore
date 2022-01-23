@@ -128,7 +128,7 @@ namespace FFMpegCore
             return dictionary?.ToDictionary(tag => tag.Key, tag => tag.Value, StringComparer.OrdinalIgnoreCase) ?? new Dictionary<string, string>();
         }
         
-        public static decimal DivideRatio((int, int) ratio) => ratio.Item1 == 0 ? 0 : (decimal)ratio.Item1 / (decimal)ratio.Item2;
+        public static decimal DivideRatio((int, int) ratio) => ratio.Item2 == 0 ? 0 : (decimal)ratio.Item1 / (decimal)ratio.Item2;
 
         public static (int, int) ParseRatioInt(string input, char separator)
         {

@@ -38,7 +38,7 @@ namespace FFMpegCore
 
             return string.Join(string.Empty, result.OutputData);
         }
-        
+
         public static IMediaAnalysis AnalyseStreamJson(string json)
         {
             var ffprobeAnalysis = JsonSerializer.Deserialize<FFProbeAnalysis>(json, StreamSerializerOptions);
@@ -59,18 +59,16 @@ namespace FFMpegCore
             return ParseOutput(result);
         }
         
-        public static string GetFrameJson(string filePath, int outputCapacity = int.MaxValue,
-            FFOptions? ffOptions = null)
+        public static string GetFrameJson(string filePath, FFOptions? ffOptions = null)
         {
             if (!File.Exists(filePath))
                 throw new FFMpegException(FFMpegExceptionType.File, $"No file found at '{filePath}'");
 
-            using var instance = PrepareFrameAnalysisInstance(filePath, outputCapacity, ffOptions ?? GlobalFFOptions.Current);
-            var exitCode = instance.BlockUntilFinished();
-            if (exitCode != 0)
-                throw new FFMpegException(FFMpegExceptionType.Process, $"ffprobe exited with non-zero exit-code ({exitCode} - {string.Join("\n", instance.ErrorData)})", null, string.Join("\n", instance.ErrorData));
+            var instance = PrepareFrameAnalysisInstance(filePath, ffOptions ?? GlobalFFOptions.Current);
+            var result = instance.StartAndWaitForExit();
+            ThrowIfExitCodeNotZero(result);
 
-            return string.Join(string.Empty, instance.OutputData);
+            return string.Join(string.Empty, result.OutputData);
         }
         public static FFProbeFrames AnalyseFrameJson(string json)
         {
