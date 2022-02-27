@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Text.Json;
 using System.Text.Json.Serialization;
 
@@ -179,11 +180,19 @@ namespace FFMpegCore
     {
         private static string? TryGetTagValue(ITagsContainer tagsContainer, string key)
         {
-            if (tagsContainer.Tags != null && tagsContainer.Tags.TryGetValue(key, out var tagValue))
-                return tagValue;
+            if (tagsContainer.Tags != null)
+            {
+                //select the first matching tag ignoring case
+                var tag = tagsContainer.Tags.Where(x => x.Key.Equals(key, StringComparison.InvariantCultureIgnoreCase))
+                                            .Select(e => (KeyValuePair<string, string>?)e)
+                                            .FirstOrDefault();
+                if (tag != null)
+                        return tag.Value.Value;
+            }
+
             return null;
         }
-        
+
         public static string? GetLanguage(this ITagsContainer tagsContainer) => TryGetTagValue(tagsContainer, "language");
         public static string? GetCreationTime(this ITagsContainer tagsContainer) => TryGetTagValue(tagsContainer, "creation_time ");
         public static string? GetRotate(this ITagsContainer tagsContainer) => TryGetTagValue(tagsContainer, "rotate");
