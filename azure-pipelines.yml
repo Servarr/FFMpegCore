@@ -20,7 +20,7 @@ stages:
     jobs:
     - job: Build
       pool:
-        vmImage: ubuntu-18.04
+        vmImage: ubuntu-20.04
       steps:
         - bash: |
             NUGETVERSION="${MAJORVERSION}-${MINORVERSION}"
