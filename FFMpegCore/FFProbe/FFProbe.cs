@@ -192,22 +192,11 @@ namespace FFMpegCore
 
         public static List<FFProbePixelFormat> GetPixelFormats(FFOptions? ffOptions = null)
         {
-            FFProbeHelper.RootExceptionCheck();
-
-            var options = ffOptions ?? GlobalFFOptions.Current;
-            FFProbeHelper.VerifyFFProbeExists(options);
-
-            var instance = new ProcessArguments(GlobalFFOptions.GetFFProbeBinaryPath(), "-loglevel error -print_format json -show_pixel_formats")
-            {
-                DataBufferCapacity = int.MaxValue
-            };
-
+            var instance = PreparePixelFormatAnalysisInstance(ffOptions ?? GlobalFFOptions.Current);
             var result = instance.StartAndWaitForExit();
             ThrowIfExitCodeNotZero(result);
 
-            var output = string.Join(string.Empty, result.OutputData);
-
-            return JsonSerializer.Deserialize<FFProbePixelFormats>(output, StreamSerializerOptions)?.PixelFormats ?? new List<FFProbePixelFormat>();
+            return ParsePixelFormats(result);
         }
 
         private static IMediaAnalysis ParseOutput(IProcessResult instance)
@@ -230,6 +219,12 @@ namespace FFMpegCore
             }) ;
 
             return ffprobeAnalysis!;
+        }
+
+        private static List<FFProbePixelFormat> ParsePixelFormats(IProcessResult instance)
+        {
+            var json = string.Join(string.Empty, instance.OutputData);
+            return JsonSerializer.Deserialize<FFProbePixelFormats>(json, StreamSerializerOptions)?.PixelFormats ?? new List<FFProbePixelFormat>();
         }
 
         private static void ThrowIfInputFileDoesNotExist(string filePath)
@@ -255,7 +250,9 @@ namespace FFMpegCore
             => PrepareInstance($"-loglevel error -print_format json -show_frames -v quiet -sexagesimal {ffOptions.ExtraArguments} \"{filePath}\"", ffOptions);
         private static ProcessArguments PreparePacketAnalysisInstance(string filePath, FFOptions ffOptions)
             => PrepareInstance($"-loglevel error -print_format json -show_packets -v quiet -sexagesimal \"{filePath}\"", ffOptions);
-        
+        private static ProcessArguments PreparePixelFormatAnalysisInstance(FFOptions ffOptions)
+            => PrepareInstance($"-loglevel error -print_format json -show_pixel_formats", ffOptions);
+
         private static ProcessArguments PrepareInstance(string arguments, FFOptions ffOptions)
         {
             FFProbeHelper.RootExceptionCheck();
