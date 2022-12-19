@@ -165,6 +165,39 @@ namespace FFMpegCore.Test
         }
 
         [TestMethod]
+        public void Probe_BrdiskISO()
+        {
+            var info = FFProbe.Analyse(TestResources.BrdiskISO);
+            Assert.AreEqual(3, info.Duration.Minutes);
+
+            Assert.AreEqual("mono", info.PrimaryAudioStream!.ChannelLayout);
+            Assert.AreEqual(1, info.PrimaryAudioStream.Channels);
+            Assert.AreEqual("ATSC A/52A (AC-3)", info.PrimaryAudioStream.CodecLongName);
+            Assert.AreEqual("ac3", info.PrimaryAudioStream.CodecName);
+            Assert.AreEqual(32000, info.PrimaryAudioStream.BitRate);
+            Assert.AreEqual(44100, info.PrimaryAudioStream.SampleRateHz);
+            Assert.AreEqual("AC-3", info.PrimaryAudioStream.CodecTagString);
+            Assert.AreEqual("0x332d4341", info.PrimaryAudioStream.CodecTag);
+
+            Assert.AreEqual(30000/1001m, info.PrimaryVideoStream.FrameRate);
+            Assert.AreEqual(30000/1001m, info.PrimaryVideoStream.AvgFrameRate);
+            Assert.AreEqual(20, info.PrimaryVideoStream.DisplayAspectRatio.Width);
+            Assert.AreEqual(11, info.PrimaryVideoStream.DisplayAspectRatio.Height);
+            Assert.AreEqual("yuv420p", info.PrimaryVideoStream.PixelFormat);
+            Assert.AreEqual("smpte170m", info.PrimaryVideoStream.ColorSpace);
+            Assert.AreEqual("smpte170m", info.PrimaryVideoStream.ColorPrimaries);
+            Assert.AreEqual("smpte170m", info.PrimaryVideoStream.ColorTransfer);
+            Assert.AreEqual(720, info.PrimaryVideoStream.Width);
+            Assert.AreEqual(480, info.PrimaryVideoStream.Height);
+            Assert.AreEqual("H.264 / AVC / MPEG-4 AVC / MPEG-4 part 10", info.PrimaryVideoStream.CodecLongName);
+            Assert.AreEqual("h264", info.PrimaryVideoStream.CodecName);
+            Assert.AreEqual(8, info.PrimaryVideoStream.BitsPerRawSample);
+            Assert.AreEqual("High", info.PrimaryVideoStream.Profile);
+            Assert.AreEqual("HDMV", info.PrimaryVideoStream.CodecTagString);
+            Assert.AreEqual("0x564d4448", info.PrimaryVideoStream.CodecTag);
+        }
+
+        [TestMethod]
         public void Probe_Dolby_Vision()
         {
             var info = FFProbe.Analyse(TestResources.Dovi, int.MaxValue);
