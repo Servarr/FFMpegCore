@@ -29,10 +29,15 @@ namespace FFMpegCore
         public static string GetStreamJson(string filePath, int outputCapacity = int.MaxValue,
             FFOptions? ffOptions = null)
         {
-            if (!File.Exists(filePath))
-                throw new FFMpegException(FFMpegExceptionType.File, $"No file found at '{filePath}'");
+            return GetStreamJson(FileUri(filePath), outputCapacity, ffOptions);
+        }
+        public static string GetStreamJson(Uri uri, int outputCapacity = int.MaxValue,
+            FFOptions? ffOptions = null)
+        {
+            if (IsLocalFile(uri) && !File.Exists(uri.LocalPath))
+                throw new FFMpegException(FFMpegExceptionType.File, $"No file found at '{uri.LocalPath}'");
 
-            using var instance = PrepareStreamAnalysisInstance(filePath, outputCapacity, ffOptions ?? GlobalFFOptions.Current);
+            using var instance = PrepareStreamAnalysisInstance(InputArgument(uri), outputCapacity, ffOptions ?? GlobalFFOptions.Current);
             var exitCode = instance.BlockUntilFinished();
             if (exitCode != 0)
                 throw new FFMpegException(FFMpegExceptionType.Process, $"ffprobe exited with non-zero exit-code ({exitCode} - {string.Join("\n", instance.ErrorData)})", null, string.Join("\n", instance.ErrorData));
@@ -49,10 +54,14 @@ namespace FFMpegCore
         }
         public static IMediaAnalysis Analyse(string filePath, int outputCapacity = int.MaxValue, FFOptions? ffOptions = null)
         {
-            if (!File.Exists(filePath)) 
-                throw new FFMpegException(FFMpegExceptionType.File, $"No file found at '{filePath}'");
+            return Analyse(FileUri(filePath), outputCapacity, ffOptions);
+        }
+        public static IMediaAnalysis Analyse(Uri uri, int outputCapacity = int.MaxValue, FFOptions? ffOptions = null)
+        {
+            if (IsLocalFile(uri) && !File.Exists(uri.LocalPath))
+                throw new FFMpegException(FFMpegExceptionType.File, $"No file found at '{uri.LocalPath}'");
             
-            using var instance = PrepareStreamAnalysisInstance(filePath, outputCapacity, ffOptions ?? GlobalFFOptions.Current);
+            using var instance = PrepareStreamAnalysisInstance(InputArgument(uri), outputCapacity, ffOptions ?? GlobalFFOptions.Current);
             var exitCode = instance.BlockUntilFinished();
             if (exitCode != 0)
                 throw new FFMpegException(FFMpegExceptionType.Process, $"ffprobe exited with non-zero exit-code ({exitCode} - {string.Join("\n", instance.ErrorData)})", null, string.Join("\n", instance.ErrorData));
@@ -62,10 +71,15 @@ namespace FFMpegCore
         public static string GetFrameJson(string filePath, int outputCapacity = int.MaxValue,
             FFOptions? ffOptions = null)
         {
-            if (!File.Exists(filePath))
-                throw new FFMpegException(FFMpegExceptionType.File, $"No file found at '{filePath}'");
+            return GetFrameJson(FileUri(filePath), outputCapacity, ffOptions);
+        }
+        public static string GetFrameJson(Uri uri, int outputCapacity = int.MaxValue,
+            FFOptions? ffOptions = null)
+        {
+            if (IsLocalFile(uri) && !File.Exists(uri.LocalPath))
+                throw new FFMpegException(FFMpegExceptionType.File, $"No file found at '{uri.LocalPath}'");
 
-            using var instance = PrepareFrameAnalysisInstance(filePath, outputCapacity, ffOptions ?? GlobalFFOptions.Current);
+            using var instance = PrepareFrameAnalysisInstance(InputArgument(uri), outputCapacity, ffOptions ?? GlobalFFOptions.Current);
             var exitCode = instance.BlockUntilFinished();
             if (exitCode != 0)
                 throw new FFMpegException(FFMpegExceptionType.Process, $"ffprobe exited with non-zero exit-code ({exitCode} - {string.Join("\n", instance.ErrorData)})", null, string.Join("\n", instance.ErrorData));
@@ -78,10 +92,14 @@ namespace FFMpegCore
         }
         public static FFProbeFrames GetFrames(string filePath, int outputCapacity = int.MaxValue, FFOptions? ffOptions = null)
         {
-            if (!File.Exists(filePath))
-                throw new FFMpegException(FFMpegExceptionType.File, $"No file found at '{filePath}'");
+            return GetFrames(FileUri(filePath), outputCapacity, ffOptions);
+        }
+        public static FFProbeFrames GetFrames(Uri uri, int outputCapacity = int.MaxValue, FFOptions? ffOptions = null)
+        {
+            if (IsLocalFile(uri) && !File.Exists(uri.LocalPath))
+                throw new FFMpegException(FFMpegExceptionType.File, $"No file found at '{uri.LocalPath}'");
 
-            using var instance = PrepareFrameAnalysisInstance(filePath, outputCapacity, ffOptions ?? GlobalFFOptions.Current);
+            using var instance = PrepareFrameAnalysisInstance(InputArgument(uri), outputCapacity, ffOptions ?? GlobalFFOptions.Current);
             var exitCode = instance.BlockUntilFinished();
             if (exitCode != 0)
                 throw new FFMpegException(FFMpegExceptionType.Process, $"ffprobe exited with non-zero exit-code ({exitCode} - {string.Join("\n", instance.ErrorData)})", null, string.Join("\n", instance.ErrorData));
@@ -91,10 +109,14 @@ namespace FFMpegCore
 
         public static FFProbePackets GetPackets(string filePath, int outputCapacity = int.MaxValue, FFOptions? ffOptions = null)
         {
-            if (!File.Exists(filePath))
-                throw new FFMpegException(FFMpegExceptionType.File, $"No file found at '{filePath}'");
+            return GetPackets(FileUri(filePath), outputCapacity, ffOptions);
+        }
+        public static FFProbePackets GetPackets(Uri uri, int outputCapacity = int.MaxValue, FFOptions? ffOptions = null)
+        {
+            if (IsLocalFile(uri) && !File.Exists(uri.LocalPath))
+                throw new FFMpegException(FFMpegExceptionType.File, $"No file found at '{uri.LocalPath}'");
 
-            using var instance = PreparePacketAnalysisInstance(filePath, outputCapacity, ffOptions ?? GlobalFFOptions.Current);
+            using var instance = PreparePacketAnalysisInstance(InputArgument(uri), outputCapacity, ffOptions ?? GlobalFFOptions.Current);
             var exitCode = instance.BlockUntilFinished();
             if (exitCode != 0)
                 throw new FFMpegException(FFMpegExceptionType.Process, $"ffprobe exited with non-zero exit-code ({exitCode} - {string.Join("\n", instance.ErrorData)})", null, string.Join("\n", instance.ErrorData));
@@ -102,15 +124,6 @@ namespace FFMpegCore
             return ParsePacketsOutput(instance);
         }
 
-        public static IMediaAnalysis Analyse(Uri uri, int outputCapacity = int.MaxValue, FFOptions? ffOptions = null)
-        {
-            using var instance = PrepareStreamAnalysisInstance(uri.AbsoluteUri, outputCapacity, ffOptions ?? GlobalFFOptions.Current);
-            var exitCode = instance.BlockUntilFinished();
-            if (exitCode != 0)
-                throw new FFMpegException(FFMpegExceptionType.Process, $"ffprobe exited with non-zero exit-code ({exitCode} - {string.Join("\n", instance.ErrorData)})", null, string.Join("\n", instance.ErrorData));
-
-            return ParseOutput(instance);
-        }
         public static IMediaAnalysis Analyse(Stream stream, int outputCapacity = int.MaxValue, FFOptions? ffOptions = null)
         {
             var streamPipeSource = new StreamPipeSource(stream);
@@ -136,10 +149,14 @@ namespace FFMpegCore
         }
         public static async Task<IMediaAnalysis> AnalyseAsync(string filePath, int outputCapacity = int.MaxValue, FFOptions? ffOptions = null)
         {
-            if (!File.Exists(filePath)) 
-                throw new FFMpegException(FFMpegExceptionType.File, $"No file found at '{filePath}'");
+            return await AnalyseAsync(FileUri(filePath), outputCapacity, ffOptions);
+        }
+        public static async Task<IMediaAnalysis> AnalyseAsync(Uri uri, int outputCapacity = int.MaxValue, FFOptions? ffOptions = null)
+        {
+            if (IsLocalFile(uri) && !File.Exists(uri.LocalPath))
+                throw new FFMpegException(FFMpegExceptionType.File, $"No file found at '{uri.LocalPath}'");
             
-            using var instance = PrepareStreamAnalysisInstance(filePath, outputCapacity, ffOptions ?? GlobalFFOptions.Current);
+            using var instance = PrepareStreamAnalysisInstance(InputArgument(uri), outputCapacity, ffOptions ?? GlobalFFOptions.Current);
             var exitCode = await instance.FinishedRunning().ConfigureAwait(false);
             if (exitCode != 0)
                 throw new FFMpegException(FFMpegExceptionType.Process, $"ffprobe exited with non-zero exit-code ({exitCode} - {string.Join("\n", instance.ErrorData)})", null, string.Join("\n", instance.ErrorData));
@@ -149,33 +166,32 @@ namespace FFMpegCore
 
         public static async Task<FFProbeFrames> GetFramesAsync(string filePath, int outputCapacity = int.MaxValue, FFOptions? ffOptions = null)
         {
-            if (!File.Exists(filePath))
-                throw new FFMpegException(FFMpegExceptionType.File, $"No file found at '{filePath}'");
+            return await GetFramesAsync(FileUri(filePath), outputCapacity, ffOptions);
+        }
+        public static async Task<FFProbeFrames> GetFramesAsync(Uri uri, int outputCapacity = int.MaxValue, FFOptions? ffOptions = null)
+        {
+            if (IsLocalFile(uri) && !File.Exists(uri.LocalPath))
+                throw new FFMpegException(FFMpegExceptionType.File, $"No file found at '{uri.LocalPath}'");
 
-            using var instance = PrepareFrameAnalysisInstance(filePath, outputCapacity, ffOptions ?? GlobalFFOptions.Current);
+            using var instance = PrepareFrameAnalysisInstance(InputArgument(uri), outputCapacity, ffOptions ?? GlobalFFOptions.Current);
             await instance.FinishedRunning().ConfigureAwait(false);
             return ParseFramesOutput(instance);
         }
 
         public static async Task<FFProbePackets> GetPacketsAsync(string filePath, int outputCapacity = int.MaxValue, FFOptions? ffOptions = null)
         {
-            if (!File.Exists(filePath))
-                throw new FFMpegException(FFMpegExceptionType.File, $"No file found at '{filePath}'");
+            return await GetPacketsAsync(FileUri(filePath), outputCapacity, ffOptions);
+        }
+        public static async Task<FFProbePackets> GetPacketsAsync(Uri uri, int outputCapacity = int.MaxValue, FFOptions? ffOptions = null)
+        {
+            if (IsLocalFile(uri) && !File.Exists(uri.LocalPath))
+                throw new FFMpegException(FFMpegExceptionType.File, $"No file found at '{uri.LocalPath}'");
 
-            using var instance = PreparePacketAnalysisInstance(filePath, outputCapacity, ffOptions ?? GlobalFFOptions.Current);
+            using var instance = PreparePacketAnalysisInstance(InputArgument(uri), outputCapacity, ffOptions ?? GlobalFFOptions.Current);
             await instance.FinishedRunning().ConfigureAwait(false);
             return ParsePacketsOutput(instance);
         }
 
-        public static async Task<IMediaAnalysis> AnalyseAsync(Uri uri, int outputCapacity = int.MaxValue, FFOptions? ffOptions = null)
-        {
-            using var instance = PrepareStreamAnalysisInstance(uri.AbsoluteUri, outputCapacity, ffOptions ?? GlobalFFOptions.Current);
-            var exitCode = await instance.FinishedRunning().ConfigureAwait(false);
-            if (exitCode != 0)
-                throw new FFMpegException(FFMpegExceptionType.Process, $"ffprobe exited with non-zero exit-code ({exitCode} - {string.Join("\n", instance.ErrorData)})", null, string.Join("\n", instance.ErrorData));
-
-            return ParseOutput(instance);
-        }
         public static async Task<IMediaAnalysis> AnalyseAsync(Stream stream, int outputCapacity = int.MaxValue, FFOptions? ffOptions = null)
         {
             var streamPipeSource = new StreamPipeSource(stream);
@@ -245,13 +261,25 @@ namespace FFMpegCore
             return ffprobeAnalysis;
         }
 
+        private static bool IsLocalFile(Uri uri)
+        {
+            return uri.IsFile || uri.Scheme == "bluray";
+        }
+        private static Uri FileUri(string filePath)
+        {
+            return new Uri(Path.GetFullPath(filePath));
+        }
+        private static string InputArgument(Uri uri)
+        {
+            return uri.IsFile ? uri.LocalPath : uri.GetComponents(UriComponents.AbsoluteUri, UriFormat.Unescaped);
+        }
 
-        private static Instance PrepareStreamAnalysisInstance(string filePath, int outputCapacity, FFOptions ffOptions)
-            => PrepareInstance($"-loglevel error -print_format json -show_format -sexagesimal -show_streams {ffOptions.ExtraArguments} \"{filePath}\"", outputCapacity, ffOptions);
-        private static Instance PrepareFrameAnalysisInstance(string filePath, int outputCapacity, FFOptions ffOptions)
-            => PrepareInstance($"-loglevel error -print_format json -show_frames -v quiet -sexagesimal {ffOptions.ExtraArguments} \"{filePath}\"", outputCapacity, ffOptions);
-        private static Instance PreparePacketAnalysisInstance(string filePath, int outputCapacity, FFOptions ffOptions)
-            => PrepareInstance($"-loglevel error -print_format json -show_packets -v quiet -sexagesimal \"{filePath}\"", outputCapacity, ffOptions);
+        private static Instance PrepareStreamAnalysisInstance(string input, int outputCapacity, FFOptions ffOptions)
+            => PrepareInstance($"-loglevel error -print_format json -show_format -sexagesimal -show_streams {ffOptions.ExtraArguments} \"{input}\"", outputCapacity, ffOptions);
+        private static Instance PrepareFrameAnalysisInstance(string input, int outputCapacity, FFOptions ffOptions)
+            => PrepareInstance($"-loglevel error -print_format json -show_frames -v quiet -sexagesimal {ffOptions.ExtraArguments} \"{input}\"", outputCapacity, ffOptions);
+        private static Instance PreparePacketAnalysisInstance(string input, int outputCapacity, FFOptions ffOptions)
+            => PrepareInstance($"-loglevel error -print_format json -show_packets -v quiet -sexagesimal \"{input}\"", outputCapacity, ffOptions);
         
         private static Instance PrepareInstance(string arguments, int outputCapacity, FFOptions ffOptions)
         {

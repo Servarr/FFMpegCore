@@ -1,4 +1,6 @@
-﻿namespace FFMpegCore.Test.Resources
+﻿using System;
+
+namespace FFMpegCore.Test.Resources
 {
     public enum AudioType
     {
@@ -23,5 +25,6 @@
         public static readonly string SrtSubtitle = "./Resources/sample.srt";
         public static readonly string Dovi = "./Resources/dovi.mp4";
         public static readonly string Interlaced = "./Resources/interlaced.mkv";
+        public static readonly Uri BrdiskISO = new Uri("bluray:./Resources/brdisk.iso");
     }
 }
